@@ -3,3 +3,7 @@
 .RData
 .Ruserdata
 .DS_Store
+mtx/
+ndata/
+end_ndata/
+result/
