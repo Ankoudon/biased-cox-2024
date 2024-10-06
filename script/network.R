@@ -85,7 +85,7 @@ for (h in 1:session) {
     # Date when the vaccine gets effective
     effect_date = 0,
     # Number of contacts when individuals get infected
-    transmissibility = 0,
+    required_contacts = 0,
     # Flag for survival analysis, {0: not included, 1: included}
     test_sample = 0,
     # PCR test before the second dose, {0: not pass, 1: pass}
@@ -112,7 +112,9 @@ for (h in 1:session) {
     # Assign pre-symptomatic period
     pre_sym_period = rbinom(people_n,
                             size = i_period,
-                            prob = 0.5))
+                            prob = 0.5),
+    # Total number of infectious contacts
+    inf_exposure = 0)
   
   setwd("../ndata")
   # Save the population data as a parquet file
