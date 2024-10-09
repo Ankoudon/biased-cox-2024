@@ -21,7 +21,7 @@ tactic <- 0
 # Vaccine efficacy 
 v_benefit <- 0.941
 
-for (h in 1:100) {
+for (h in 1:5) {
   
   print(h)
 
@@ -99,7 +99,7 @@ expo1_expo2 <- 0
 
 path_2 <- paste0("~/biased-cox-2024/exposure/h")
 
-for (h in 1:100) {
+for (h in 1:5) {
   
   print(h)
   
@@ -110,11 +110,18 @@ for (h in 1:100) {
     collect() 
   
   data <- data |> arrange(id, round)
+  
   # Calculate the daily exposure
   data <- data |> 
     mutate(daily_exposure = inf_exposure - lag(inf_exposure)) |> 
     filter(((round >= 134) & (state == "s")) | 
              ((round >= 134) & (state == "e") & (daily_exposure > 0)))
+  
+  # Revise the daily exposure for the first day (134)
+  data <- data |> 
+    mutate(daily_exposure = ifelse(round == 134,
+                                   inf_exposure,
+                                   daily_exposure))
   
   # Count the number of non-infected cases with no exposure
   new_non_expo_non_inf <- data |> 
@@ -172,5 +179,83 @@ matrix(c(expo_inf, non_expo_inf, expo_non_inf, non_expo_non_inf), nrow = 2)
 # Create the table 3
 matrix(c(expo1_expo2, expo1_non_expo2, non_expo1_expo2, non_expo1_non_expo2),
        nrow = 2)
+
+########## Fisher's combined probability test ##########
+
+library(metap)
+
+# p-values from 2x2 tables
+p_vec_fisher <- c()
+
+path_2 <- paste0("~/biased-cox-2024/exposure/h")
+
+for (h in 1:100) {
+  
+  print(h)
+  
+  data <- open_dataset(
+    sources = paste0(
+      path_2, h, "_", v_benefit, "_exposure", "_t", tactic, ".parquet"),
+    format = "parquet") |> 
+    collect() 
+  
+  data <- data |> arrange(id, round)
+  
+  # Calculate the daily exposure
+  data <- data |> 
+    mutate(daily_exposure = inf_exposure - lag(inf_exposure)) |> 
+    filter(((round >= 134) & (state == "s")) | 
+             ((round >= 134) & (state == "e") & (daily_exposure > 0)))
+  
+  # Revise the daily exposure for the first day (134)
+  data <- data |> 
+    mutate(daily_exposure = ifelse(round == 134,
+                                   inf_exposure,
+                                   daily_exposure))
+  
+  # Calculate the daily exposure for the previous period
+  data <- data |>
+    mutate(daily_exposure_2 = lag(daily_exposure)) |>
+    filter(round >= 135)
+  
+  # Create a 2x2 table every day
+  for (i in 136:210) {
+    
+    print(i)
+    
+    data_day <- data |> filter(round == i)
+    
+    # Count the number of cases which have no exposure in both periods
+    non_expo1_non_expo2 <- data_day |> 
+      filter(daily_exposure == 0 & daily_exposure_2 == 0) |> nrow()
+    
+    # Count the number of cases which have no exposure in this period and exposure in the previous period
+    non_expo1_expo2 <- data_day |> 
+      filter(daily_exposure == 0 & daily_exposure_2 > 0) |> nrow()
+    
+    # Count the number of cases which have exposure in this period and no exposure in the previous period
+    expo1_non_expo2 <- data_1 |>
+      filter(daily_exposure > 0 & daily_exposure_2 == 0) |> nrow()
+    
+    # Count the number of cases which have exposure in both periods
+    expo1_expo2 <- data_1 |>
+      filter(daily_exposure > 0 & daily_exposure_2 > 0) |> nrow()
+    
+    # Make 2x2 table
+    mtx <- matrix(c(expo1_expo2,
+                    expo1_non_expo2,
+                    non_expo1_expo2,
+                    non_expo1_non_expo2), nrow = 2)
+    # Fisher's exact test
+    fisher_test <- fisher.test(mtx)
+    # Append the p-value to the vector
+    p_vec_fisher <- c(fisher_test$p.value, p_vec_fisher)
+    
+  }
+  
+}
+
+# Fisher's combined probability test
+sumlog(p_vec_fish)
 
 
