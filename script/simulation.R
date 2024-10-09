@@ -43,6 +43,7 @@ subjects_n <- 300000
 # Length of time for vaccine to be effective  
 sample_period <- 42
 # Vaccine efficacy 
+# 0.677, 0.669, 0.740, 0.897, 0.916, 0.941, 0.950
 v_benefit <- 0.941
 # External infection per week
 external_inf <- 700
