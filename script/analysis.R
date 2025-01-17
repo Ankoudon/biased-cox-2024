@@ -1,7 +1,8 @@
 ################################################################################
 
-# Thesis: "Impact of Correlation of Exposure between Two Consecutive
-# Periods On Estimating Vaccine Efficacy", Hiroyasu Ando, Akihiro Nishi
+# Thesis: Impact of Correlation of Unmeasured Exposure Status across Time on the
+# Estimation of Vaccine Efficacy
+# Periods On Estimating Vaccine Efficacy", Hiroyasu Ando, A. James O’Malley, Akihiro Nishi
 # Purpose: Analyze the data
 
 ########## Table 1, VE_SAR, and VE_IR ##########
@@ -16,12 +17,12 @@ pla_inf <- 0
 
 path_2 <- paste0("~/Desktop/biased-cox-2024/end_ndata/h")
 
-# 0: Without permutation, 1: With permutation
+# 0: Without permutation, 1: all-but-participants permutation, 2: all-but-bubbles permutation
 tactic <- 0
 # Vaccine efficacy 
 v_benefit <- 0.941
 
-for (h in 1:5) {
+for (h in 1:100) {
   
   print(h)
 
@@ -99,7 +100,12 @@ expo1_expo2 <- 0
 
 path_2 <- paste0("~/biased-cox-2024/exposure/h")
 
-for (h in 1:5) {
+# 0: Without permutation, 1: all-but-participants permutation, 2: all-but-bubbles permutation
+tactic <- 0
+# Vaccine efficacy 
+v_benefit <- 0.941
+
+for (h in 1:100) {
   
   print(h)
   
@@ -189,6 +195,11 @@ p_vec_fisher <- c()
 
 path_2 <- paste0("~/biased-cox-2024/exposure/h")
 
+# 0: Without permutation, 1: all-but-participants permutation, 2: all-but-bubbles permutation
+tactic <- 1
+# Vaccine efficacy 
+v_benefit <- 0.941
+
 for (h in 1:100) {
   
   print(h)
@@ -219,7 +230,7 @@ for (h in 1:100) {
     filter(round >= 135)
   
   # Create a 2x2 table every day
-  for (i in 136:210) {
+  for (i in 135:210) {
     
     print(i)
     
@@ -234,11 +245,11 @@ for (h in 1:100) {
       filter(daily_exposure == 0 & daily_exposure_2 > 0) |> nrow()
     
     # Count the number of cases which have exposure in this period and no exposure in the previous period
-    expo1_non_expo2 <- data_1 |>
+    expo1_non_expo2 <- data_day |>
       filter(daily_exposure > 0 & daily_exposure_2 == 0) |> nrow()
     
     # Count the number of cases which have exposure in both periods
-    expo1_expo2 <- data_1 |>
+    expo1_expo2 <- data_day |>
       filter(daily_exposure > 0 & daily_exposure_2 > 0) |> nrow()
     
     # Make 2x2 table
@@ -256,6 +267,6 @@ for (h in 1:100) {
 }
 
 # Fisher's combined probability test
-sumlog(p_vec_fish)
+sumlog(p_vec_fisher)
 
 

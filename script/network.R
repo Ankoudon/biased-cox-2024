@@ -22,7 +22,7 @@ library(arrow)
 # (3) Parameters 
 
 # Number of vertices
-people_n <- 3000000
+people_n <- 10000000
 # Number of simulations
 session <- 5
 # Infectious period (mean) 
@@ -44,7 +44,7 @@ for (h in 1:session) {
   set.seed(h)
   
   # Barabási–Albert model (power = 0.01, m = 2)
-  g <- sample_pa(n = people_n, power = 0.01, m = 2, directed = FALSE)  
+  g <- sample_pa(n = people_n, power = 0.65, m = 3, directed = FALSE)  
   # Create adjacency matrix 
   ydata0 <- as_adjacency_matrix(g, type = "both",
                                 sparse = igraph_opt("sparsematrices"))
